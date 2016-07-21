@@ -1,0 +1,11 @@
+.idea/
+node_modules/
+*.log
+**/*.log
+download/
+.DS_Store
+._.DS_Store
+._.TemporaryItems
+**/.DS_Store
+**/._.DS_Store
+**/._.TemporaryItems
