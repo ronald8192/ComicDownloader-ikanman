@@ -3,12 +3,14 @@
 require 'json'
 require 'net/http'
 require 'fileutils'
+require 'uri'
 
 class Downloader
   @@downloadRoot = './download/'
-  @@comicId = nil;
+  @@comicId = nil
+  @@name_with_index = false
 
-  def download(host, path, filename, referer, dest)
+  def download(host, path, filename, referer, dest, index, total)
     uri = URI("#{host}#{path}#{filename}")
 
     req = Net::HTTP::Get.new(uri)
@@ -21,6 +23,13 @@ class Downloader
     }
 
     #save to file
+    #if filename.downcase.end_with? '.png'
+    #  filename = filename.split('.')
+    #  filename[filename.length-1] = 'jpg'
+    #  filename = filename.join('.')
+    #end
+    filename = "#{(index+1).to_s.rjust(total.to_s.length,'0')}|#{filename}" if @@name_with_index
+    filename = URI.unescape filename
     open "#{@@downloadRoot}#{dest}/#{filename}", 'w' do |io|
       io.write res.body
     end if res.is_a?(Net::HTTPSuccess)
@@ -50,22 +59,30 @@ class Downloader
     return useragents[Random.rand(0..useragents.length)]
   end
 
+
+  @@name_with_index = ARGV.length > 0 ? ARGV[0] == '--name-with-index' : false
   comic = JSON.parse(File.read('download/chapters.json'))
   @@comicId = comic['comicId']
   @@downloadRoot += "#{@@comicId}/"
+
   chapters = comic['chapters']
-  chapters.each do |chapter|
+
+  chapters.each_with_index { |chapter, index|
+    chapter['dest'] = "#{(index+1).to_s.rjust(chapters.length.to_s.length,'0')}|#{chapter['dest']}" if @@name_with_index
+    total = chapter['images'].length
+
     if File.directory?("#{@@downloadRoot}#{chapter['dest']}")
       puts "#{chapter['dest']} downloaded, skip."
       next
     end
+
     puts "Downloading: #{chapter['dest']}..."
 
     FileUtils.mkdir_p "#{@@downloadRoot}#{chapter['dest']}"
-    chapter['images'].each do |image|
-      Downloader.new.download chapter['host'], chapter['path'], image, chapter["referer"], chapter['dest']
-    end
-  end
+    chapter['images'].each_with_index { |image, index|
+      Downloader.new.download chapter['host'], chapter['path'], image, chapter["referer"], chapter['dest'], index, total
+    }
+  }
   puts 'Download complete.'
 
 end
