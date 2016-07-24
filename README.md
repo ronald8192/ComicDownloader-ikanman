@@ -16,7 +16,8 @@ node main.js {comicId}
 
 # after `main.js` finish, `download/chapters.json` should be created
 # then start to download the images
-./download.rb
+# create file/directory with index number, easier to sort
+./download.rb --name-with-index
 ```
 
 File will save to `./download/comicId/`
