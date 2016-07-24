@@ -21,7 +21,6 @@ class Downloader
     }
 
     #save to file
-    FileUtils.mkdir_p "#{@@downloadRoot}#{dest}" if !File.directory?("#{@@downloadRoot}#{dest}")
     open "#{@@downloadRoot}#{dest}/#{filename}", 'w' do |io|
       io.write res.body
     end if res.is_a?(Net::HTTPSuccess)
@@ -61,6 +60,8 @@ class Downloader
       next
     end
     puts "Downloading: #{chapter['dest']}..."
+
+    FileUtils.mkdir_p "#{@@downloadRoot}#{chapter['dest']}"
     chapter['images'].each do |image|
       Downloader.new.download chapter['host'], chapter['path'], image, chapter["referer"], chapter['dest']
     end
