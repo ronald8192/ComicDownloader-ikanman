@@ -2,10 +2,13 @@
 
 Comic Downloader for ikanman.com
 
+:warning: :warning: The download part (`download.rb`) is not working anymore since ikanman add additional checking on server side. I might fix it if I have time. You can still use `main.js` to get the image url list. It downloaded to `download/chapters.json`.
+
 ## Download and Install dependencies
     git clone --depth 1 https://github.com/ronald8192/ComicDownloader-ikanman.git
     cd ComicDownloader-ikanman
     npm install
+    npm install bluebird
 
 ## How to use
 
